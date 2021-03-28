@@ -1,0 +1,6 @@
+/vendor/
+/build/
+*.cache
+clover.xml
+/xml-coverage/
+*.txt
