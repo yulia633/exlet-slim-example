@@ -2,6 +2,6 @@
 
 <?php foreach ($user as $key => $value) : ?>
    <div>
-        <?= $key ?>: <?= $value ?>
+        <?= htmlspecialchars($key) ?>: <?= htmlspecialchars($value) ?>
     </div>
 <?php endforeach ?>
