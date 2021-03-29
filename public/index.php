@@ -26,15 +26,22 @@ $app->get('/', function ($request, $response) {
 });
 
 $app->get('/users', function ($request, $response) use ($users) {
+    $page = $request->getQueryParam('page', 1);
+    $per = $request->getQueryParam('per', 5);
+    $offset = ($page - 1) * $per;
+
+    $sliceUsers = array_slice($users, $offset, $per);
+
     $search = $request->getQueryParam('search');
     if ($search) {
-        $users = collect($users)->filter(function ($user) use ($search) {
+        $sliceUsers = collect($users)->filter(function ($user) use ($search) {
             return stripos($user['firstName'], $search) !== false;
         })->toArray();
     }
     $params = [
-        'users' => $users,
-        'search' => $search
+        'users' => $sliceUsers,
+        'search' => $search,
+        'page' => $page
     ];
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
 });
