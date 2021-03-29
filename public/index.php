@@ -33,7 +33,8 @@ $app->get('/users', function ($request, $response) use ($users) {
         })->toArray();
     }
     $params = [
-        'users' => $users
+        'users' => $users,
+        'search' => $search
     ];
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
 });
