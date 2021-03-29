@@ -5,6 +5,8 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Slim\Factory\AppFactory;
 use DI\Container;
+use App\Validator;
+use App\Repository;
 
 // Список пользователей
 // Каждый пользователь – ассоциативный массив
@@ -20,6 +22,7 @@ $container->set('renderer', function () {
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 $app->addErrorMiddleware(true, true, true);
+$router = $app->getRouteCollector()->getRouteParser();
 
 $app->get('/', function ($request, $response) {
     return $this->get('renderer')->render($response, 'index.phtml');
@@ -44,6 +47,36 @@ $app->get('/users', function ($request, $response) use ($users) {
         'page' => $page
     ];
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
+});
+
+$app->get('/users/new', function ($request, $response) {
+    $params = [
+        'users' => [
+            'nickname' => '',
+            'email' => '',
+            'id' => '',
+        ],
+        'errors' => [],
+    ];
+    return $this->get('renderer')->render($response, 'users/new.phtml', $params);
+});
+
+$app->post('/users', function ($request, $response) use ($router) {
+    $validator = new Validator();
+    $repo = new Repository();
+
+    $user = $request->getParsedBodyParam('user');
+    $errors = $validator->validate($user);
+
+    if (empty($errors)) {
+        $repo->save($user);
+        return $response->withRedirect('/users', 302);
+    }
+    $params = [
+        'users' => $user,
+        'errors' => $errors
+    ];
+    return $this->get('renderer')->render($response, 'users/new.phtml', $params);
 });
 
 $app->get('/users/{id}', function ($request, $response, $args) use ($users) {
