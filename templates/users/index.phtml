@@ -1,7 +1,7 @@
 <a href="/users">Пользователи</a>
 
 <form action="/users" method="get">
-    <input type="search" required name="search">
+    <input type="search" required name="search" value="<?= htmlspecialchars($search) ?>">
     <input type="submit" value="Search">
 </form>
 
