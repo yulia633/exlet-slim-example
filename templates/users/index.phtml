@@ -1,4 +1,15 @@
+<a href="/users">Пользователи</a>
+
+<form action="/users" method="get">
+    <input type="search" required name="search">
+    <input type="submit" value="Search">
+</form>
+
 <table>
+    <tr>
+        <th>id</th>
+        <th>first name</a></th>
+    </tr>
   <?php foreach ($users as $user) : ?>
     <tr>
       <td>
