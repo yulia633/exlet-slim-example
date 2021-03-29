@@ -12,7 +12,7 @@ class Repository
     {
         $id = uniqid();
         $data['id'] = $id;
-        $formattedData = writeFile($data);
+        $formattedData = $this->writeFile($data);
     }
 
     public function all()
