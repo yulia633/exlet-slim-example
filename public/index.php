@@ -76,7 +76,7 @@ $app->post('/users', function ($request, $response) use ($router) {
         'users' => $user,
         'errors' => $errors
     ];
-    return $this->get('renderer')->render($response, 'users/new.phtml', $params);
+    return $this->get('renderer')->render($response->withStatus(422), 'users/new.phtml', $params);
 });
 
 $app->get('/users/{id}', function ($request, $response, $args) use ($users) {
