@@ -58,8 +58,8 @@ $app->get('/users', function ($request, $response) use ($users) {
 })->setName('users');
 
 $app->get('/users/new', function ($request, $response) {
-   $params = [
-        'users' => [
+    $params = [
+        'user' => [
             'nickname' => '',
             'email' => '',
             'id' => '',
