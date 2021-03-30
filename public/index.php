@@ -47,7 +47,7 @@ $app->get('/users', function ($request, $response) use ($users) {
         'page' => $page
     ];
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
-});
+})->setName('users');
 
 $app->get('/users/new', function ($request, $response) {
     $params = [
@@ -59,7 +59,7 @@ $app->get('/users/new', function ($request, $response) {
         'errors' => [],
     ];
     return $this->get('renderer')->render($response, 'users/new.phtml', $params);
-});
+})->setName('new');
 
 $app->post('/users', function ($request, $response) use ($router) {
     $validator = new Validator();
@@ -70,7 +70,8 @@ $app->post('/users', function ($request, $response) use ($router) {
 
     if (empty($errors)) {
         $repo->add($user);
-        return $response->withRedirect('/users', 302);
+        $url = $router->urlFor('users');
+        return $response->withRedirect($url, 302);
     }
     $params = [
         'users' => $user,
@@ -84,6 +85,6 @@ $app->get('/users/{id}', function ($request, $response, $args) use ($users) {
     $user = collect($users)->firstWhere('id', $id);
     $params = ['user' => $user];
     return $this->get('renderer')->render($response, 'users/show.phtml', $params);
-});
+})->setName('new');
 
 $app->run();
