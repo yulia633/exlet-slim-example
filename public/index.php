@@ -8,6 +8,9 @@ use DI\Container;
 use App\Validator;
 use App\Repository;
 
+// Старт сессии PHP
+session_start();
+
 // Список пользователей
 // Каждый пользователь – ассоциативный массив
 // следующей структуры: id, firstName, lastName, email
@@ -18,6 +21,9 @@ $container->set('renderer', function () {
     // Параметром передается базовая директория, в которой будут храниться шаблоны
     return new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
 });
+$container->set('flash', function () {
+    return new \Slim\Flash\Messages();
+});
 
 AppFactory::setContainer($container);
 $app = AppFactory::create();
@@ -26,9 +32,10 @@ $router = $app->getRouteCollector()->getRouteParser();
 
 $app->get('/', function ($request, $response) {
     return $this->get('renderer')->render($response, 'index.phtml');
-});
+})->setName('index');
 
 $app->get('/users', function ($request, $response) use ($users) {
+    $flash = $this->get('flash')->getMessages();
     $page = $request->getQueryParam('page', 1);
     $per = $request->getQueryParam('per', 5);
     $offset = ($page - 1) * $per;
@@ -44,13 +51,14 @@ $app->get('/users', function ($request, $response) use ($users) {
     $params = [
         'users' => $sliceUsers,
         'search' => $search,
-        'page' => $page
+        'page' => $page,
+        'flash' => $flash,
     ];
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
 })->setName('users');
 
 $app->get('/users/new', function ($request, $response) {
-    $params = [
+   $params = [
         'users' => [
             'nickname' => '',
             'email' => '',
@@ -71,6 +79,7 @@ $app->post('/users', function ($request, $response) use ($router) {
     if (empty($errors)) {
         $repo->add($user);
         $url = $router->urlFor('users');
+        $this->get('flash')->addMessage('success', 'User has been added');
         return $response->withRedirect($url, 302);
     }
     $params = [
