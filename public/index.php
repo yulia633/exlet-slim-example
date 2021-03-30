@@ -34,22 +34,23 @@ $app->get('/', function ($request, $response) {
     return $this->get('renderer')->render($response, 'index.phtml');
 })->setName('index');
 
-$app->get('/users', function ($request, $response) use ($users) {
+$app->get('/users', function ($request, $response) {
+
+    $repo = new Repository();
+    $allUsers = $repo->all();
+
     $flash = $this->get('flash')->getMessages();
     $page = $request->getQueryParam('page', 1);
     $per = $request->getQueryParam('per', 5);
     $offset = ($page - 1) * $per;
+    $sliceUsers = array_slice($allUsers, $offset, $per);
 
-    $sliceUsers = array_slice($users, $offset, $per);
+    $search = $request->getQueryParam('search', null);
+    $filteredUsers = array_filter($allUsers, fn ($user) => is_numeric(strpos($user->nickname, $search)));
+    $users = $search ? $filteredUsers : $sliceUsers;
 
-    $search = $request->getQueryParam('search');
-    if ($search) {
-        $sliceUsers = collect($users)->filter(function ($user) use ($search) {
-            return stripos($user['firstName'], $search) !== false;
-        })->toArray();
-    }
     $params = [
-        'users' => $sliceUsers,
+        'users' => $users,
         'search' => $search,
         'page' => $page,
         'flash' => $flash,
@@ -59,7 +60,7 @@ $app->get('/users', function ($request, $response) use ($users) {
 
 $app->get('/users/new', function ($request, $response) {
     $params = [
-        'user' => [
+        'users' => [
             'nickname' => '',
             'email' => '',
             'id' => '',
@@ -83,17 +84,20 @@ $app->post('/users', function ($request, $response) use ($router) {
         return $response->withRedirect($url, 302);
     }
     $params = [
-        'users' => $user,
+        'user' => $user,
         'errors' => $errors
     ];
     return $this->get('renderer')->render($response->withStatus(422), 'users/new.phtml', $params);
 });
 
-$app->get('/users/{id}', function ($request, $response, $args) use ($users) {
+$app->get('/users/{id}', function ($request, $response, $args) {
+    $repo = new Repository();
     $id = $args['id'];
-    $user = collect($users)->firstWhere('id', $id);
-    $params = ['user' => $user];
+    $user = $repo->get($id);
+    $params = [
+        'user' => $user,
+    ];
     return $this->get('renderer')->render($response, 'users/show.phtml', $params);
-})->setName('new');
+})->setName('user');
 
 $app->run();
