@@ -69,7 +69,7 @@ $app->post('/users', function ($request, $response) use ($router) {
     $errors = $validator->validate($user);
 
     if (empty($errors)) {
-        $repo->save($user);
+        $repo->add($user);
         return $response->withRedirect('/users', 302);
     }
     $params = [

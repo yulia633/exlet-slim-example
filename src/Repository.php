@@ -4,22 +4,37 @@ namespace App;
 
 class Repository
 {
-    private $data = [];
-    private $stream;
     private const PATH = __DIR__ . '/../repo/users';
+
+    public function readFile(string $filePath): string
+    {
+        if (!file_exists(self::PATH)) {
+            throw new \Exception("The file file path does not exists.");
+        }
+        
+        return (string) file_get_contents(self::PATH);
+    }
+
+
+    public function encodeData($data)
+    {
+        $formattedData = "\n" . json_encode($data);
+        file_put_contents(self::PATH, $formattedData, FILE_APPEND);   
+    }
 
     public function add(array $data)
     {
         $id = uniqid();
         $data['id'] = $id;
-        $formattedData = $this->writeFile($data);
+        $this->encodeData($data);
     }
-
+    
     public function all()
     {
-        $filename = pathinfo(self::PATH, PATHINFO_FILENAME);
-        $jsonData = $this->readFile($filename);
-        return $jsonData;
+        $json = $this->readFile(self::PATH);
+        $dataStrings = explode("\n", $json);
+        $data = array_map(fn ($string) => json_decode($string), $dataStrings);
+        return $data;
     }
 
     public function get($id)
@@ -36,37 +51,6 @@ class Repository
         $currentData = $this->get($id);
         $indexOfData = array_search($currentData, $allData);
         $allData[$indexOfData] = $data;
-        $this->writeFile($data);
-    }
-
-    public function readFile(string $filename): array
-    {
-        if (!file_exists($filename)) {
-            touch($filename);
-        }
-
-        $this->stream = fopen($filename, "r+");
-
-        if (!flock($this->stream, LOCK_EX | LOCK_NB)) {
-            throw new \Exception("The file {$filename} unable to lock.");
-        }
-
-        $content = json_decode(stream_get_contents($this->stream), true);
-
-        if ($content === null) {
-            $content = [];
-        }
-        
-        return $content;
-    }
-
-    public function writeFile(array $data)
-    {
-        ftruncate($this->stream, 0);
-        fseek($this->stream, 0);
-        fwrite($this->stream, json_encode($data));
-
-        flock($this->stream, LOCK_UN);
-        fclose($this->stream);
+        $out = array_map(fn ($item) => $this->encodeData($item), $allData);
     }
 }
