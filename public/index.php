@@ -4,6 +4,7 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 use Slim\Factory\AppFactory;
+use Slim\Middleware\MethodOverrideMiddleware;
 use DI\Container;
 use App\Validator;
 use App\Repository;
@@ -27,6 +28,7 @@ $container->set('flash', function () {
 
 AppFactory::setContainer($container);
 $app = AppFactory::create();
+$app->add(MethodOverrideMiddleware::class);
 $app->addErrorMiddleware(true, true, true);
 $router = $app->getRouteCollector()->getRouteParser();
 
@@ -99,5 +101,46 @@ $app->get('/users/{id}', function ($request, $response, $args) {
     ];
     return $this->get('renderer')->render($response, 'users/show.phtml', $params);
 })->setName('user');
+
+$app->get('/users/{id}/edit', function ($request, $response, $args) {
+    $repo = new Repository();
+    $id = $args['id'];
+    $user = $repo->get($id);
+    $params = [
+        'user' => $user,
+        'errors' => []
+    ];
+    return $this->get('renderer')->render($response, 'users/edit.phtml', $params);
+})->setName('editUser');
+
+
+$app->patch('/users/{id}', function ($request, $response, array $args) use ($router) {
+    $id = $args['id'];
+    $repo = new Repository();
+    $user = $repo->get($id);
+    $data = $request->getParsedBodyParam('user');
+
+    $validator = new Validator();
+    $errors = $validator->validate($data);
+
+    if (count($errors) === 0) {
+        // Ручное копирование данных из формы в нашу сущность
+        $user->nickname = $data['nickname'];
+        $user->email = $data['email'];
+        $repo->save($user);
+
+        $this->get('flash')->addMessage('success', 'User has been updated');
+        $url = $router->urlFor('editUser', ['id' => $user->id]);
+        return $response->withRedirect($url);
+    }
+
+    $params = [
+        'user' => $user,
+        'errors' => $errors
+    ];
+
+    $response = $response->withStatus(422);
+    return $this->get('renderer')->render($response, 'users/edit.phtml', $params);
+});
 
 $app->run();
