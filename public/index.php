@@ -106,9 +106,12 @@ $app->get('/users/{id}/edit', function ($request, $response, $args) {
     $repo = new Repository();
     $id = $args['id'];
     $user = $repo->get($id);
+    $messages = $this->get('flash')->getMessages();
     $params = [
         'user' => $user,
-        'errors' => []
+        'userData' => $user,
+        'errors' => [],
+        'flash' => $messages
     ];
     return $this->get('renderer')->render($response, 'users/edit.phtml', $params);
 })->setName('editUser');
@@ -130,17 +133,31 @@ $app->patch('/users/{id}', function ($request, $response, array $args) use ($rou
         $repo->save($user);
 
         $this->get('flash')->addMessage('success', 'User has been updated');
-        $url = $router->urlFor('editUser', ['id' => $user->id]);
+        $url = $router->urlFor('user', ['id' => $user->id]);
         return $response->withRedirect($url);
     }
 
     $params = [
         'user' => $user,
-        'errors' => $errors
+        'userData' => $data,
+        'errors' => $errors,
+        'flash' => []
     ];
 
     $response = $response->withStatus(422);
     return $this->get('renderer')->render($response, 'users/edit.phtml', $params);
+});
+
+$app->delete('/users/{id}', function ($request, $response, array $args) use ($router) {
+    $repo = new Repository();
+
+    $id = $args['id'];
+    $repo->destroy($id);
+
+    $url = $router->urlFor('users');
+
+    $this->get('flash')->addMessage('success', 'User has been deleted');
+    return $response->withRedirect($url);
 });
 
 $app->run();

@@ -44,6 +44,11 @@ class Repository
         return $data;
     }
 
+    public function destroy(string $id)
+    {
+        unset($id);
+    }
+
     public function save($data)
     {
         $id = $data->id;
