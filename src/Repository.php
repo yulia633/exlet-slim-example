@@ -10,7 +10,7 @@ class Repository
 
     public function __construct($path)
     {
-        $this->path = $path . '.json';
+        $this->path = "{$path}.json";
         if (!file_exists($this->path)) {
             file_put_contents($this->path, '[]');
             $this->data = [];
@@ -31,14 +31,11 @@ class Repository
 
     public function add(array $row = [])
     {
-        if (!array_key_exists('id', $row)) {
-            $row['id'] = uniqid();
-            while (count($this->select(['id' => $row['id']])) > 0) {
-                $row['id'] = uniqid();
-            }
-        } 
+        $id = uniqid();
+        
+        $row['id'] = $id;
 
-        $this->data[] = $row;
+        $this->data[$id] = $row;
         $this->save();
         return $row;
     }
@@ -54,28 +51,10 @@ class Repository
        foreach ($oldData as $key => $value) {
           foreach ($value as $item) {
         $oldData[$key] = $row;
-        // die;
           }
-
-          //var_dump($oldData);
      }
 
-    // var_dump($oldData);die;
-
-     
-
-
-      // $newData[] = $row;
-    //   var_dump($this->data);
-    //     var_dump($row);
-    //     $this->data[] = $row;
-    //     var_dump($this->data);
-    //     die;
-
-      // var_dump($newData);
-
      $this->data[] = $oldData;
-     var_dump($this->data);die;
       $this->save();
         return $oldData;
     }
@@ -90,6 +69,39 @@ class Repository
             }
         );
         return $results;
+    }
+    
+    public function findById(string $id): ?array
+    {
+        $users = $this->data;
+        
+        foreach($users as $user) {
+            if ($user['id'] === $id) {
+                return $user;
+            }
+        }
+        
+        return null;
+    }
+    
+    public function update(string $id, array $data): void
+    {
+        $users = $this->data;
+        
+        $userIndex = null;
+        foreach($users as $index => $user) {
+            if ($user['id'] === $id) {
+                $userIndex = $index;
+            }
+        }
+        if ($userIndex === null) {
+            throw new \DomainException('user not found');
+        }
+
+        $updatedData = array_merge($user, $data);
+        
+        $this->data[$userIndex] = $updatedData;
+        $this->save();
     }
 
 
@@ -123,6 +135,10 @@ class Repository
             if ($isMatch) {
                 $callback($row, $i);
             }
+        }
+        
+        foreach($this->data as $id => $row) {
+            
         }
     }
 
