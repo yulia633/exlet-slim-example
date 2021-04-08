@@ -1,29 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Изменить пользователя <?= $user['nickname'] ?></title>
+</head>
+<body>
 <a href="/users">Пользователи</a>
 
-<?php var_dump($users); ?>
-
-
-<?php foreach ($users as $user) : ?>
-    <?php if (count($user) < 2) : ?>
-        <p><?= htmlspecialchars($user['id']) ?></p>
-    
-    <?php else : ?>
-<p><?= htmlspecialchars($user['nickname']) ?></p>
 <table>
-    <tr>
-       <td>Email</td>
-       <td> <?= htmlspecialchars($user['email']) ?? "1" ?> </td>
-    </tr>
-    <tr>
-       <td>id</td>
-       <td> <?= htmlspecialchars($user['id']) ?? "" ?> </td>
-    </tr>
+    <?php foreach($user as $key => $value): ?>
+        <tr>
+            <td><?= $key ?> </td>
+            <td><?= $value ?> </td>
+        </tr>
+    <?php endforeach; ?>
 </table>
-<?php endif  ?>
-<?php endforeach ?>
 
+<form action="/users/<?= $user['id'] ?>/edit">
+    <input type="submit" value="Edit">
 </form>
-  <form action="/users/<?= htmlspecialchars($user['id']) ?>" method="post">
+
+<form action="/users/<?= htmlspecialchars($user['id']) ?>" method="post">
     <input hidden name="_METHOD" value="DELETE">
     <input type="submit" value="Delete user">
-  </form>
+</form>
+</body>
+</html>
