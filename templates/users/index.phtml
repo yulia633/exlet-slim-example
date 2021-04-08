@@ -1,5 +1,8 @@
 <a href="/users">Пользователи</a>
 
+
+<?php var_dump($users); ?>
+
 <?php if (count($flash) > 0) : ?>
     <ul>
     <?php foreach ($flash as $messages) : ?>
@@ -20,12 +23,16 @@
         <th>id</th>
         <th>first name</th>
     </tr>
-  <?php foreach ($users as $user) : ?>
+  <?php foreach ($users as $user => $value) : ?>
     <tr>
       <td>
-          <a href="/users/<?= $user->id ?>"><?= $user->nickname ?></a>
+      <a href="/users/<?= $value['id']?>"><?= $value['id']?></a>
+      </td>
+      <td>
+      <a href="/users/<?= $value['id']?>"><?= $value['nickname'] ?? ' ' ?></a>
       </td>
     </tr>
+
   <?php endforeach ?>
 </table>
 <br>

@@ -1,19 +1,29 @@
 <a href="/users">Пользователи</a>
 
-<p><?= htmlspecialchars($user->nickname) ?></p>
+<?php var_dump($users); ?>
+
+
+<?php foreach ($users as $user) : ?>
+    <?php if (count($user) < 2) : ?>
+        <p><?= htmlspecialchars($user['id']) ?></p>
+    
+    <?php else : ?>
+<p><?= htmlspecialchars($user['nickname']) ?></p>
 <table>
     <tr>
        <td>Email</td>
-       <td> <?= htmlspecialchars($user->email) ?> </td>
+       <td> <?= htmlspecialchars($user['email']) ?? "1" ?> </td>
     </tr>
     <tr>
        <td>id</td>
-       <td> <?= htmlspecialchars($user->id) ?> </td>
+       <td> <?= htmlspecialchars($user['id']) ?? "" ?> </td>
     </tr>
 </table>
+<?php endif  ?>
+<?php endforeach ?>
 
 </form>
-  <form action="/users/<?= htmlspecialchars($user->id) ?>" method="post">
+  <form action="/users/<?= htmlspecialchars($user['id']) ?>" method="post">
     <input hidden name="_METHOD" value="DELETE">
     <input type="submit" value="Delete user">
   </form>
