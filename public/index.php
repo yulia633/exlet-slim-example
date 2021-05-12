@@ -33,7 +33,7 @@ $app->addErrorMiddleware(true, true, true);
 $router = $app->getRouteCollector()->getRouteParser();
 
 $app->get('/', function ($request, $response) {
-    return $this->get('renderer')->render($response, 'index.phtml');
+    return $this->get('renderer')->render($response, 'users/index.phtml');
 })->setName('index');
 
 $app->get('/users', function ($request, $response) {
